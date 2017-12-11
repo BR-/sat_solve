@@ -71,13 +71,13 @@ class CNF: #AND of ORs
 		return ret
 
 	def random(self):
-		for var in cnf.variables:
-			cnf.variables[var] = not random.getrandbits(1)
+		for var in self.variables:
+			self.variables[var] = not random.getrandbits(1)
 
 	def walksat(self):
 		self.random()
 		while not self.evaluate():
-			clause = random.choice(cnf.satisfied(False))
+			clause = random.choice(self.satisfied(False))
 			orig = self.satisfied()
 			best_var = []
 			best_sat = 0
