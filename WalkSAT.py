@@ -2,9 +2,6 @@
 	# there are some test files at the bottom of
 	# http://people.sc.fsu.edu/~jburkardt/data/cnf/cnf.html
 	# (need to redo the input parser for these)
-# todo: avoid local minima
-	# restart with new random variables if it hasn't found anything for too long
-	# probably reset the "too long" counter if you hit a new maximum number of clauses satisfied for that attempt
 # todo: gsat version
 	# really easy, just delete the "orig" variable and replace it with:
 	# sat = sum(1 for o in self.clauses if o.evaluate())
@@ -107,9 +104,22 @@ class CNF: #AND of ORs
 
 	def walksat(self):
 		self.random()
+		reset_counter = 0
+		reset_best = 0
 		while not self.evaluate():
-			clause = random.choice(self.satisfied(False))
 			orig = self.satisfied()
+			if len(orig) > reset_best:
+				print(len(orig))
+				reset_counter = 0
+				reset_best = len(orig)
+			else:
+				reset_counter += 1
+				if reset_counter > 500:
+					self.random()
+					reset_counter = 0
+					reset_best = 0
+					continue
+			clause = random.choice(self.satisfied(False))
 			best_var = []
 			best_sat = 0
 			for var in clause.vars:
