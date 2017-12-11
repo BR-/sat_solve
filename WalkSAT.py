@@ -2,9 +2,6 @@
 	# there are some test files at the bottom of
 	# http://people.sc.fsu.edu/~jburkardt/data/cnf/cnf.html
 	# https://toughsat.appspot.com
-# todo: gsat version
-	# really easy, just delete the "orig" variable and replace it with:
-	# sat = sum(1 for o in self.clauses if o.evaluate())
 
 import random
 import timeit
@@ -103,7 +100,7 @@ class CNF: #AND of ORs
 		for var in self.variables:
 			self.variables[var] = not random.getrandbits(1)
 
-	def walksat(self):
+	def walksat(self, gsat=False):
 		self.random()
 		reset_counter = 0
 		reset_best = 0
@@ -125,7 +122,10 @@ class CNF: #AND of ORs
 			best_sat = 0
 			for var in clause.vars:
 				var.toggle()
-				sat = sum(1 for o in orig if o.evaluate())
+				if gsat:
+					sat = sum(1 for o in self.clauses if o.evaluate())
+				else:
+					sat = sum(1 for o in orig if o.evaluate())
 				if sat > best_sat:
 					best_sat = sat
 					best_var = [var]
