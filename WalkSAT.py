@@ -43,19 +43,50 @@ class CNFClause:
 		return "+".join(str(var) for var in self.vars)
 
 class CNF: #AND of ORs
-	def __init__(self, expr):
-		self.variables = {}
-		self.clauses = []
+	def from_human(expr):
+		variables = {}
+		clauses = []
 		for clause in expr.split("*"):
 			cl = []
 			for var in clause.strip("()").split("+"):
 				if var[0] == "!":
-					cl.append(Boolean(self.variables, var[1:], True))
-					self.variables[var[1:]] = None
+					cl.append(Boolean(variables, var[1:], True))
+					variables[var[1:]] = None
 				else:
-					cl.append(Boolean(self.variables, var))
-					self.variables[var] = None
-			self.clauses.append(CNFClause(cl))
+					cl.append(Boolean(variables, var))
+					variables[var] = None
+			clauses.append(CNFClause(cl))
+		return CNF(variables, clauses)
+
+	def from_dimacs(dimacs):
+		variables = {}
+		clauses = []
+		for line in dimacs:
+			if line[0] == 'c':
+				continue
+			elif line[0] == 'p':
+				p, problem_type, vars, cls = line.split()
+				if problem_type != "cnf":
+					raise Exception("invalid file type")
+				for v in range(int(vars)):
+					variables[str(v+1)] = None
+			else:
+				cl = []
+				for var in line.split():
+					var = int(var)
+					if var == 0:
+						break
+					elif var < 0:
+						cl.append(Boolean(variables, str(-1 * var), True))
+					else:
+						cl.append(Boolean(variables, str(var)))
+				clauses.append(CNFClause(cl))
+		return CNF(variables, clauses)
+		
+
+	def __init__(self, variables, clauses):
+		self.variables = variables
+		self.clauses = clauses
 
 	def evaluate(self):
 		ret = True
@@ -96,7 +127,7 @@ class CNF: #AND of ORs
 	def __str__(self):
 		return "(" + ")*(".join(str(cl) for cl in self.clauses) + ")"
 
-cnf = CNF("(A+B)*(!B+C+!D)*(D+!E)")
+cnf = CNF.from_human("(A+B)*(!B+C+!D)*(D+!E)")
 print(cnf)
 cnf.walksat()
 print(cnf.variables)
@@ -121,8 +152,20 @@ for clause in range(1000):
 	if attempt:
 		expr.append(cl)
 string = "*".join("+".join(str(v) for v in cl) for cl in expr)
-cnf = CNF(string)
-print(cnf)
-print(len(cnf.clauses))
+cnf = CNF.from_human(string)
+#print(cnf)
+print(len(cnf.clauses), "clauses")
+cnf.walksat()
+print(cnf.variables)
+
+
+
+
+
+
+
+with open("A:\\file.cnf", "r") as fh:
+	cnf = CNF.from_dimacs(fh)
+print(len(cnf.clauses), "clauses")
 cnf.walksat()
 print(cnf.variables)
