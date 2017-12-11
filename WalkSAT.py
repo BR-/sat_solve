@@ -1,12 +1,13 @@
 # test files
 	# there are some test files at the bottom of
 	# http://people.sc.fsu.edu/~jburkardt/data/cnf/cnf.html
-	# (need to redo the input parser for these)
+	# https://toughsat.appspot.com
 # todo: gsat version
 	# really easy, just delete the "orig" variable and replace it with:
 	# sat = sum(1 for o in self.clauses if o.evaluate())
 
 import random
+import timeit
 
 class Boolean:
 	def __init__(self, variables, name, inverted=False):
@@ -109,7 +110,7 @@ class CNF: #AND of ORs
 		while not self.evaluate():
 			orig = self.satisfied()
 			if len(orig) > reset_best:
-				print(len(orig))
+				#print(len(orig))
 				reset_counter = 0
 				reset_best = len(orig)
 			else:
@@ -139,7 +140,7 @@ class CNF: #AND of ORs
 
 cnf = CNF.from_human("(A+B)*(!B+C+!D)*(D+!E)")
 print(cnf)
-cnf.walksat()
+print(timeit.timeit(cnf.walksat, number=5))
 print(cnf.variables)
 
 
@@ -165,7 +166,7 @@ string = "*".join("+".join(str(v) for v in cl) for cl in expr)
 cnf = CNF.from_human(string)
 #print(cnf)
 print(len(cnf.clauses), "clauses")
-cnf.walksat()
+print(timeit.timeit(cnf.walksat, number=5))
 print(cnf.variables)
 
 
@@ -174,8 +175,8 @@ print(cnf.variables)
 
 
 
-with open("A:\\file.cnf", "r") as fh:
+with open("A:\\sat.cnf", "r") as fh:
 	cnf = CNF.from_dimacs(fh)
 print(len(cnf.clauses), "clauses")
-cnf.walksat()
+print(timeit.timeit(cnf.walksat, number=5))
 print(cnf.variables)
