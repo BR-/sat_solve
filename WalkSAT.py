@@ -100,7 +100,7 @@ class CNF: #AND of ORs
 		for var in self.variables:
 			self.variables[var] = not random.getrandbits(1)
 
-	def walksat(self, gsat=False):
+	def walksat(self, random_flip=0.2, gsat=False):
 		self.random()
 		reset_counter = 0
 		reset_best = 0
@@ -118,21 +118,24 @@ class CNF: #AND of ORs
 					reset_best = 0
 					continue
 			clause = random.choice(self.satisfied(False))
-			best_var = []
-			best_sat = 0
-			for var in clause.vars:
-				var.toggle()
-				if gsat:
-					sat = sum(1 for o in self.clauses if o.evaluate())
-				else:
-					sat = sum(1 for o in orig if o.evaluate())
-				if sat > best_sat:
-					best_sat = sat
-					best_var = [var]
-				elif sat == best_sat:
-					best_var.append(var)
-				var.toggle()
-			random.choice(best_var).toggle()
+			if random.random() > random_flip:
+				best_var = []
+				best_sat = 0
+				for var in clause.vars:
+					var.toggle()
+					if gsat:
+						sat = sum(1 for o in self.clauses if o.evaluate())
+					else:
+						sat = sum(1 for o in orig if o.evaluate())
+					if sat > best_sat:
+						best_sat = sat
+						best_var = [var]
+					elif sat == best_sat:
+						best_var.append(var)
+					var.toggle()
+				random.choice(best_var).toggle()
+			else:
+				random.choice(clause.vars).toggle()
 		return True
 
 	def __str__(self):
