@@ -56,6 +56,7 @@ class CNF: #AND of ORs
 	def from_dimacs(dimacs):
 		variables = {}
 		clauses = []
+		cl = []
 		for line in dimacs:
 			if line[0] == 'c':
 				continue
@@ -66,16 +67,15 @@ class CNF: #AND of ORs
 				for v in range(int(vars)):
 					variables[str(v+1)] = None
 			else:
-				cl = []
 				for var in line.split():
 					var = int(var)
 					if var == 0:
-						break
+						clauses.append(CNFClause(cl))
+						cl = []
 					elif var < 0:
 						cl.append(Boolean(variables, str(-1 * var), True))
 					else:
 						cl.append(Boolean(variables, str(var)))
-				clauses.append(CNFClause(cl))
 		return CNF(variables, clauses)
 		
 
